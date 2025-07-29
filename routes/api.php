@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Admin\UserController as AdminUserController; // Import with an alias
 
 //======================================
 // Public Routes
@@ -22,9 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Admin-only routes
-    Route::middleware('isAdmin')->group(function () {
-        Route::post('/books', [BookController::class, 'store']); // Create a new book
-        // Add other admin-only routes here in the future
+     // Admin-only routes
+     Route::middleware('isAdmin')->group(function () {
+        Route::post('/books', [BookController::class, 'store']);
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
     });
 });
