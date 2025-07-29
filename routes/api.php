@@ -16,4 +16,7 @@ Route::get('/books', [BookController::class, 'index']);
 // Protected routes that require authentication via Sanctum
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
 });
