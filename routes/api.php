@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Admin\UserController as AdminUserController; // Imp
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/books', [BookController::class, 'index']); // Get all books is public
+Route::get('/books/{book}', [BookController::class, 'show']);
 
 //======================================
 // Protected Routes (requires authentication)
@@ -27,5 +28,6 @@ Route::middleware('auth:sanctum')->group(function () {
      Route::middleware('isAdmin')->group(function () {
         Route::post('/books', [BookController::class, 'store']);
         Route::get('/admin/users', [AdminUserController::class, 'index']);
+        Route::delete('/books/{book}', [BookController::class, 'destroy']);
     });
 });

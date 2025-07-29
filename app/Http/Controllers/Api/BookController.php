@@ -41,9 +41,11 @@ class BookController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Book $book)
     {
-        //
+        // Laravel's Route Model Binding automatically finds the book by its ID.
+        // We can just return it. It will be automatically converted to JSON.
+        return $book;
     }
 
     /**
@@ -59,6 +61,11 @@ class BookController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // The admin middleware has already verified the user.
+        // We can safely delete the book.
+        $book->delete();
+
+        // Return a success response with no content.
+        return response()->noContent();
     }
 }
