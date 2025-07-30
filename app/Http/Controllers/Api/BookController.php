@@ -104,7 +104,7 @@ class BookController extends Controller
 
             // 2. Process and store the new image (same logic as our `store` method)
             $imageFile = $request->file('cover_image');
-            $image = Image::make($imageFile);
+            $image = Image::gd()->read($imageFile);
             $image->resize(800, null, function ($constraint) {
                 $constraint->aspectRatio();
                 $constraint->upsize();
