@@ -92,13 +92,19 @@ class BookController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Book $book)
     {
-        // The admin middleware has already verified the user.
-        // We can safely delete the book.
+        // 1. Check if there is an associated image file.
+        if ($book->cover_image_url) {
+            // 2. Use the Storage facade to delete the file from the public disk.
+            // This physically removes the image from the `storage/app/public` folder.
+            Storage::disk('public')->delete($book->cover_image_url);
+        }
+
+        // 3. Now, delete the book record from the database.
         $book->delete();
 
-        // Return a success response with no content.
+        // 4. Return a success response.
         return response()->noContent();
     }
 }
