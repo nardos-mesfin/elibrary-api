@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
      // Admin-only routes
      Route::middleware('isAdmin')->group(function () {
         Route::post('/books', [BookController::class, 'store']);
-        Route::get('/admin/users', [AdminUserController::class, 'index']);
         Route::delete('/books/{book}', [BookController::class, 'destroy']);
+        Route::get('/admin/users', [AdminUserController::class, 'index']);
     });
 });

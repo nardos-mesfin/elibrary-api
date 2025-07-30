@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Book;
+use Illuminate\Support\Facades\Storage; 
 
 class BookController extends Controller
 {
@@ -31,12 +32,21 @@ class BookController extends Controller
             'summary' => 'nullable|string',
             'publisher' => 'nullable|string',
             'pages' => 'nullable|integer',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Validation for the image
         ]);
-    
+
+        if ($request->hasFile('cover_image')) {
+            // Store the image in 'storage/app/public/covers'
+            // The store method returns the path to the file.
+            $path = $request->file('cover_image')->store('covers', 'public');
+            $validatedData['cover_image_url'] = $path;
+        }
+
         $book = Book::create($validatedData);
-    
+
         return response()->json($book, 201);
     }
+
 
     /**
      * Display the specified resource.
