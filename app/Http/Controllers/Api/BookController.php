@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Book;
 use Illuminate\Support\Facades\Storage; 
+use Intervention\Image\ImageManager as Image;
 
 class BookController extends Controller
 {
@@ -32,13 +33,34 @@ class BookController extends Controller
             'summary' => 'nullable|string',
             'publisher' => 'nullable|string',
             'pages' => 'nullable|integer',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Validation for the image
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
 
         if ($request->hasFile('cover_image')) {
-            // Store the image in 'storage/app/public/covers'
-            // The store method returns the path to the file.
-            $path = $request->file('cover_image')->store('covers', 'public');
+            $imageFile = $request->file('cover_image');
+
+            // Intervention v3 image handling
+            $image = Image::gd()->read($imageFile);
+
+            $image->resize(800, null, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+
+            $imageName = uniqid() . '.jpg';
+
+            // Save as high-quality JPEG
+            $image->toJpeg(75)->save(storage_path('app/temp/' . $imageName));
+
+            // Move to final public folder
+            $path = Storage::disk('public')->putFileAs(
+                'covers',
+                new \Illuminate\Http\File(storage_path('app/temp/' . $imageName)),
+                $imageName
+            );
+
+            unlink(storage_path('app/temp/' . $imageName));
+
             $validatedData['cover_image_url'] = $path;
         }
 
@@ -46,6 +68,7 @@ class BookController extends Controller
 
         return response()->json($book, 201);
     }
+
 
 
     /**
