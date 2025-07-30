@@ -84,9 +84,45 @@ class BookController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Book $book)
     {
-        //
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'author' => 'required|string|max:255',
+            'summary' => 'nullable|string',
+            'publisher' => 'nullable|string',
+            'pages' => 'nullable|integer',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB limit
+        ]);
+
+        // --- Intelligent Image Handling ---
+        if ($request->hasFile('cover_image')) {
+            // 1. A new image was uploaded. First, delete the old one.
+            if ($book->cover_image_url) {
+                Storage::disk('public')->delete($book->cover_image_url);
+            }
+
+            // 2. Process and store the new image (same logic as our `store` method)
+            $imageFile = $request->file('cover_image');
+            $image = Image::make($imageFile);
+            $image->resize(800, null, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
+            $imageName = uniqid() . '.jpg';
+            $image->save(storage_path('app/temp/' . $imageName));
+            $path = Storage::disk('public')->putFileAs('covers', new \Illuminate\Http\File(storage_path('app/temp/' . $imageName)), $imageName);
+            unlink(storage_path('app/temp/' . $imageName));
+
+            // 3. Add the new image path to our data for updating.
+            $validatedData['cover_image_url'] = $path;
+        }
+
+        // --- Update the Book record ---
+        $book->update($validatedData);
+
+        // Return the newly updated book data.
+        return response()->json($book);
     }
 
     /**
