@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController; // Import with an alias
+use App\Http\Controllers\Api\Admin\CategoryController;
 
 //======================================
 // Public Routes
@@ -29,6 +30,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/books', [BookController::class, 'store']);
         Route::delete('/books/{book}', [BookController::class, 'destroy']);
         Route::post('/books/{book}/update', [BookController::class, 'update']); 
+        
         Route::get('/admin/users', [AdminUserController::class, 'index']);
+
+        Route::get('/admin/categories', [CategoryController::class, 'index']);
+        Route::post('/admin/categories', [CategoryController::class, 'store']);
     });
 });

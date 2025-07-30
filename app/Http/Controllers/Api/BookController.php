@@ -15,11 +15,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        // Fetch all books from the database
-        $books = Book::all(); 
-
-        // Return the list of books as a JSON response
-        return response()->json($books);
+        return Book::with('categories')->latest()->get(); // Get latest books with their categories
     }
 
     /**
@@ -34,6 +30,8 @@ class BookController extends Controller
             'publisher' => 'nullable|string',
             'pages' => 'nullable|integer',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -66,6 +64,11 @@ class BookController extends Controller
 
         $book = Book::create($validatedData);
 
+        // After creating or updating the book, sync the categories
+        if ($request->has('categories')) {
+            $book->categories()->sync($request->categories);
+        }
+
         return response()->json($book, 201);
     }
 
@@ -76,9 +79,7 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        // Laravel's Route Model Binding automatically finds the book by its ID.
-        // We can just return it. It will be automatically converted to JSON.
-        return $book;
+        return $book->load('categories'); // Load categories for a single book
     }
 
     /**
@@ -93,6 +94,8 @@ class BookController extends Controller
             'publisher' => 'nullable|string',
             'pages' => 'nullable|integer',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB limit
+            'categories' => 'nullable|array',
+            'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
         ]);
 
         // --- Intelligent Image Handling ---
@@ -120,6 +123,11 @@ class BookController extends Controller
 
         // --- Update the Book record ---
         $book->update($validatedData);
+
+        // After creating or updating the book, sync the categories
+        if ($request->has('categories')) {
+            $book->categories()->sync($request->categories);
+        }
 
         // Return the newly updated book data.
         return response()->json($book);
