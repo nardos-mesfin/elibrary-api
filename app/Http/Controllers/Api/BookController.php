@@ -31,7 +31,7 @@ class BookController extends Controller
             'pages' => 'nullable|integer',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'categories' => 'nullable|array',
-            'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
+            'categories.*' => 'exists:categories,id', // Each item in the array must be a valid category ID
             'book_file' => 'nullable|file|mimes:pdf,epub|max:20480', // 20MB limit for PDFs/ePubs
         ]);
 
@@ -134,7 +134,7 @@ class BookController extends Controller
             'pages' => 'nullable|integer',
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB limit
             'categories' => 'nullable|array',
-            'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
+            'categories.*' => 'exists:categories,id', // Each item in the array must be a valid category ID
             'book_file' => 'nullable|file|mimes:pdf,epub|max:20480',
         ]);
 
