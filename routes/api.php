@@ -10,15 +10,20 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 //======================================
 // Public Routes
 //======================================
+// --- Public Routes ---
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/books', [BookController::class, 'index']); // Get all books is public
-Route::get('/books/{book}', [BookController::class, 'show']);
+Route::get('/search', [BookController::class, 'search']);
 
-// New Book Discovery Routes
+// --- Reordered Book Routes ---
+
+// Most specific routes go first
 Route::get('/books/latest', [BookController::class, 'latest']);
 Route::get('/books/popular', [BookController::class, 'popular']);
-Route::get('/search', [BookController::class, 'search']);
+
+// More generic routes go after
+Route::get('/books', [BookController::class, 'index']);
+Route::get('/books/{book}', [BookController::class, 'show']); // The "greedy" route is now last
 
 //======================================
 // Protected Routes (requires authentication)
