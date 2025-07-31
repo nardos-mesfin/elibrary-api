@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('book_keyword_pivot', function (Blueprint $table) {
+        Schema::create('book_keyword', function (Blueprint $table) {
             $table->id();
             $table->foreignId('book_id')->constrained()->onDelete('cascade');
             $table->foreignId('keyword_id')->constrained()->onDelete('cascade');
