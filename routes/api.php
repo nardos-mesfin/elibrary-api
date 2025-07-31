@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BookController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\Admin\UserController as AdminUserController; // Import with an alias
 use App\Http\Controllers\Api\Admin\CategoryController;
+use App\Http\Controllers\Api\CommentController;
 
 //======================================
 // Public Routes
@@ -14,6 +15,7 @@ use App\Http\Controllers\Api\Admin\CategoryController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/search', [BookController::class, 'search']);
+Route::get('/books/{book}/comments', [CommentController::class, 'index']);
 
 // --- Reordered Book Routes ---
 
@@ -34,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+    Route::post('/books/{book}/comments', [CommentController::class, 'store']);
 
      // Admin-only routes
      Route::middleware('isAdmin')->group(function () {

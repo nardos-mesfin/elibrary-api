@@ -48,5 +48,11 @@ class Book extends Model
     {
         return $this->belongsToMany(Category::class, 'book_category');
     }
+
+    // A book can have many comments
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->latest(); // Show latest comments first
+    }
     
 }

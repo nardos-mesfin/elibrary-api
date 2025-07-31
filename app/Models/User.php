@@ -47,4 +47,10 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    // A user can write many comments
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 }
