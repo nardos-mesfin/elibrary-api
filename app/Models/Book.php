@@ -4,32 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Storage; // <-- Import Storage
 
 class Book extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
-        'title',
-        'author',
-        'summary',
-        'publisher',
-        'pages',
-        'cover_image_url',
-        'file_url', // Ensure this is here
+        'title', 'author', 'summary', 'publisher', 'pages', 
+        'cover_image_url', 
+        'file_url',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
     protected $appends = ['full_cover_url', 'full_file_url'];
 
     /**
@@ -62,4 +48,5 @@ class Book extends Model
     {
         return $this->belongsToMany(Category::class, 'book_category');
     }
+    
 }
