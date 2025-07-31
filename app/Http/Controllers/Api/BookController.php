@@ -79,7 +79,38 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
+        $book->increment('view_count'); // Increment the view count each time this method is called
+    
         return $book->load('categories'); // Load categories for a single book
+    }
+
+    public function latest()
+    {
+        // Get the 8 most recently created books, with their categories
+        $latestBooks = Book::with('categories')->latest()->take(8)->get();
+        return response()->json($latestBooks);
+    }
+
+    public function popular()
+    {
+        // Get the 8 most viewed books, with their categories
+        $popularBooks = Book::with('categories')->orderBy('view_count', 'desc')->take(8)->get();
+        return response()->json($popularBooks);
+    }
+
+    public function search(Request $request)
+    {
+        // Validate that a search query 'q' was provided
+        $query = $request->validate(['q' => 'required|string|min:3']);
+
+        // Search the books table
+        $results = Book::with('categories')
+            ->where('title', 'like', "%{$query['q']}%")
+            ->orWhere('author', 'like', "%{$query['q']}%")
+            ->take(10)
+            ->get();
+        
+        return response()->json($results);
     }
 
     /**

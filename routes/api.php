@@ -15,6 +15,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/books', [BookController::class, 'index']); // Get all books is public
 Route::get('/books/{book}', [BookController::class, 'show']);
 
+// New Book Discovery Routes
+Route::get('/books/latest', [BookController::class, 'latest']);
+Route::get('/books/popular', [BookController::class, 'popular']);
+Route::get('/search', [BookController::class, 'search']);
+
 //======================================
 // Protected Routes (requires authentication)
 //======================================
@@ -30,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/books', [BookController::class, 'store']);
         Route::delete('/books/{book}', [BookController::class, 'destroy']);
         Route::post('/books/{book}/update', [BookController::class, 'update']); 
-        
+
         Route::get('/admin/users', [AdminUserController::class, 'index']);
 
         Route::get('/admin/categories', [CategoryController::class, 'index']);
