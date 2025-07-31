@@ -32,6 +32,7 @@ class BookController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
+            'book_file' => 'nullable|file|mimes:pdf,epub|max:20480', // 20MB limit for PDFs/ePubs
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -60,6 +61,13 @@ class BookController extends Controller
             unlink(storage_path('app/temp/' . $imageName));
 
             $validatedData['cover_image_url'] = $path;
+        }
+
+        // --- NEW: Book File Handling ---
+        if ($request->hasFile('book_file')) {
+            // Store the file in 'storage/app/public/books'
+            $filePath = $request->file('book_file')->store('books', 'public');
+            $validatedData['file_url'] = $filePath;
         }
 
         $book = Book::create($validatedData);
@@ -127,6 +135,7 @@ class BookController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB limit
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id' // Each item in the array must be a valid category ID
+            'book_file' => 'nullable|file|mimes:pdf,epub|max:20480',
         ]);
 
         // --- Intelligent Image Handling ---
@@ -151,6 +160,18 @@ class BookController extends Controller
             // 3. Add the new image path to our data for updating.
             $validatedData['cover_image_url'] = $path;
         }
+
+        // --- NEW: Book File Handling ---
+        if ($request->hasFile('book_file')) {
+            // Delete the old file if it exists
+            if ($book->file_url) {
+                Storage::disk('public')->delete($book->file_url);
+            }
+            // Store the new file
+            $filePath = $request->file('book_file')->store('books', 'public');
+            $validatedData['file_url'] = $filePath;
+        }
+    
 
         // --- Update the Book record ---
         $book->update($validatedData);

@@ -12,10 +12,11 @@ class Book extends Model
 
     protected $fillable = [
         'title', 'author', 'summary', 'publisher', 'pages', 
-        'cover_image_url', // <-- Add the cover image URL to the fillable array
+        'cover_image_url', 
+        'file_url',
     ];
 
-    protected $appends = ['full_cover_url'];
+    protected $appends = ['full_cover_url', 'full_file_url'];
 
     /**
      * Accessor for the full cover image URL.
