@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Book;
 use Illuminate\Support\Facades\Storage; 
 use Intervention\Image\ImageManager as Image;
+use App\Models\Category;
 
 class BookController extends Controller
 {
@@ -202,5 +203,18 @@ class BookController extends Controller
 
         // 4. Return a success response.
         return response()->noContent();
+    }
+
+    /**
+     * Display a listing of books for a specific category.
+     */
+    public function booksByCategory(Category $category)
+    {
+        // Because of Route Model Binding, Laravel has already found the correct category for us.
+        // We just need to load its 'books' relationship.
+        // We also eager load the categories for each of those books.
+        $books = $category->books()->with('categories')->get();
+
+        return response()->json($books);
     }
 }

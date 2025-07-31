@@ -23,6 +23,8 @@ Route::get('/books/{book}/comments', [CommentController::class, 'index']);
 Route::get('/books/latest', [BookController::class, 'latest']);
 Route::get('/books/popular', [BookController::class, 'popular']);
 
+Route::get('/categories/{category}/books', [BookController::class, 'booksByCategory']);
+
 // More generic routes go after
 Route::get('/books', [BookController::class, 'index']);
 Route::get('/books/{book}', [BookController::class, 'show']); // The "greedy" route is now last
