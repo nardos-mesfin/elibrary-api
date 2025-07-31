@@ -16,7 +16,7 @@ class BookController extends Controller
      */
     public function index()
     {
-        return Book::with('categories')->latest()->get(); // Get latest books with their categories
+        return Book::with('categories', 'keywords')->latest()->get(); // Get latest books with their categories
     }
 
     /**
@@ -34,6 +34,7 @@ class BookController extends Controller
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id', // Each item in the array must be a valid category ID
             'book_file' => 'nullable|file|mimes:pdf,epub|max:20480', // 20MB limit for PDFs/ePubs
+            'keywords' => 'nullable|string'
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -78,7 +79,22 @@ class BookController extends Controller
             $book->categories()->sync($request->categories);
         }
 
-        return response()->json($book, 201);
+        if ($request->has('keywords')) {
+            $keywordNames = explode(',', $request->keywords); // Split the string by commas
+            $keywordIds = [];
+            foreach ($keywordNames as $keywordName) {
+                $trimmedName = trim($keywordName);
+                if ($trimmedName) {
+                    // Find the keyword or create it if it doesn't exist
+                    $keyword = Keyword::firstOrCreate(['term' => $trimmedName]);
+                    $keywordIds[] = $keyword->id;
+                }
+            }
+            // Sync the book with the array of keyword IDs
+            $book->keywords()->sync($keywordIds);
+        }
+
+        return response()->json($book->fresh()->load('categories', 'keywords'), 201);
     }
 
 
@@ -90,32 +106,36 @@ class BookController extends Controller
     {
         $book->increment('view_count'); // Increment the view count each time this method is called
     
-        return $book->load('categories'); // Load categories for a single book
+        return $book->load('categories', 'keywords'); // Load categories for a single book
     }
 
     public function latest()
     {
         // Get the 8 most recently created books, with their categories
-        $latestBooks = Book::with('categories')->latest()->take(8)->get();
+        $latestBooks = Book::with('categories', 'keywords')->latest()->take(8)->get();
         return response()->json($latestBooks);
     }
 
     public function popular()
     {
         // Get the 8 most viewed books, with their categories
-        $popularBooks = Book::with('categories')->orderBy('view_count', 'desc')->take(8)->get();
+        $popularBooks = Book::with('categories', 'keywords')->orderBy('view_count', 'desc')->take(8)->get();
         return response()->json($popularBooks);
     }
 
     public function search(Request $request)
     {
-        // Validate that a search query 'q' was provided
         $query = $request->validate(['q' => 'required|string|min:3']);
+        $searchTerm = $query['q'];
 
-        // Search the books table
-        $results = Book::with('categories')
-            ->where('title', 'like', "%{$query['q']}%")
-            ->orWhere('author', 'like', "%{$query['q']}%")
+        $results = Book::with('categories', 'keywords') // <-- Eager load keywords
+            // Search in the book's title or author
+            ->where('title', 'like', "%{$searchTerm}%")
+            ->orWhere('author', 'like', "%{$searchTerm}%")
+            // Also search within the related keywords
+            ->orWhereHas('keywords', function ($q) use ($searchTerm) {
+                $q->where('term', 'like', "%{$searchTerm}%");
+            })
             ->take(10)
             ->get();
         
@@ -137,6 +157,7 @@ class BookController extends Controller
             'categories' => 'nullable|array',
             'categories.*' => 'exists:categories,id', // Each item in the array must be a valid category ID
             'book_file' => 'nullable|file|mimes:pdf,epub|max:20480',
+            'keywords' => 'nullable|string'
         ]);
 
         // --- Intelligent Image Handling ---
@@ -182,8 +203,23 @@ class BookController extends Controller
             $book->categories()->sync($request->categories);
         }
 
+        if ($request->has('keywords')) {
+            $keywordNames = explode(',', $request->keywords); // Split the string by commas
+            $keywordIds = [];
+            foreach ($keywordNames as $keywordName) {
+                $trimmedName = trim($keywordName);
+                if ($trimmedName) {
+                    // Find the keyword or create it if it doesn't exist
+                    $keyword = Keyword::firstOrCreate(['term' => $trimmedName]);
+                    $keywordIds[] = $keyword->id;
+                }
+            }
+            // Sync the book with the array of keyword IDs
+            $book->keywords()->sync($keywordIds);
+        }
+
         // Return the newly updated book data.
-        return response()->json($book);
+        return response()->json($book->load('categories', 'keywords'));
     }
 
     /**

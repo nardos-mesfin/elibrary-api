@@ -54,5 +54,10 @@ class Book extends Model
     {
         return $this->hasMany(Comment::class)->latest(); // Show latest comments first
     }
+
+    public function keywords()
+    {
+        return $this->belongsToMany(Keyword::class, 'book_keyword');
+    }
     
 }
